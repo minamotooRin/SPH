@@ -1,33 +1,21 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <cmath>
 #include <cstring>
 
+#include "common.h"
+
 #define DIM 3
-
-typedef double FLOAT;
-typedef unsigned short UINT8;
-typedef unsigned int UINT32;
-
-typedef UINT32 PARTICLE_NUMBER ;
-
-enum class ERROR_CODE
-{
-    SUCCESS, // 0
-    ERR_FILE_OPEN_FAILED,
-    ERR_FILE_IS_OPENED
-};
 
 struct GRID
 {
-    GRID():x(0),y(0),z(0){}
-    GRID(UINT32 x_, UINT32 y_, UINT32 z_):x(x_),y(y_),z(z_){}
-    UINT32 x;
-    UINT32 y;
-    UINT32 z;
+    GRID();
+    GRID(UINT32 x_, UINT32 y_, UINT32 z_);
+    UINT32 grid[DIM];
     bool operator<(const GRID & g) const;
     GRID operator+ (const GRID & g) const;
+    UINT32& operator[](const UINT32 it);
 };
 
 struct vector3D
@@ -48,8 +36,6 @@ struct vector3D
     FLOAT abs();
 
     FLOAT * getData();
-    
-    GRID getfloor( / r) const;
 };
 
 #endif

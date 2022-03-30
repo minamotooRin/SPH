@@ -4,18 +4,19 @@
 #include <vector>
 
 #include "matrix3d.h"
-#include "material.h"
+#include "parameter.h"
 
 class Particle
 {
 public:
 
-    Particle(const vector3D pos_, const Material &m);
+    Particle(const vector3D pos_);
     ~Particle();
 
-    GRID grid;
     vector3D pos;
     vector3D v; // velocity
+    GRID grid;
+    FLOAT rho;
 
     void update(FLOAT dt, const Material &m, const std::vector<Particle> &particles, const std::vector<PARTICLE_NUMBER> &p_number_nearby);
 
@@ -29,6 +30,6 @@ private:
 
 };
 
-FLOAT distance_sqr(Particle &p1, Particle &p2);
+FLOAT distance_sqr(const Particle &p1, const Particle &p2);
 
 #endif

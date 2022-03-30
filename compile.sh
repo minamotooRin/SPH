@@ -1,17 +1,20 @@
-cd src
+if [ ! -d "build" ]; then
+  mkdir build
+fi
+cd build
 
 echo "Now start compile."
-g++ *cpp -o main -std=c++17
+cmake ..
 if [ $? != 0 ]
 then
     echo "Compile Error!"
     exit 1
 fi
-echo "Compile done."
-
+make
+if [ $? != 0 ]
+then
+    echo "Compile Error!"
+    exit 1
+fi
 mv main ../
-
-cd ..
-echo "Now start running..."
-./main
-echo "Execute done."
+echo "Compile done."

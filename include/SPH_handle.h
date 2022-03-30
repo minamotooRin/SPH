@@ -8,42 +8,48 @@
 #include <functional>
 #include <random>
 #include <cmath>
+#include <fstream>
 
-#include "matrix3d.h"
 #include "Particle.h"
-#include "material.h"
 #include "Timer.h"
+
+enum class ERROR_CODE
+{
+    SUCCESS, // 0
+    ERR_FILE_OPEN_FAILED
+};
 
 class SPH_handle
 {
 public:
 
-    SPH_handle(FLOAT x, FLOAT y, FLOAT z, UINT32 N = 1000, std::string m = "water");
+    SPH_handle(std::string input, std::string output);
     ~SPH_handle();
 
-    ERROR_CODE set_export_file(const char * path);
-
-    void run(UINT32 step);
+    void run();
 
 private:
 
-    // Parameters
-    const UINT32 Dimension = DIM;
-    UINT32 ParitcleNumber;
-    vector3D volume;
-    FLOAT dt; // integration timestep
-    Material matrial;
+    bool isReady;
+
+    // I/O
+    std::string ifile;
+    std::string ofile;
+    parameter para;
+    ofstream ofs;
 
     // Statistics
     UINT32 step_cnt;
     Timer timer;
 
     // Facilities
-    FILE * fp;
     std::vector<Particle> particles;
     std::map< GRID, std::set<PARTICLE_NUMBER> > grid_2_particles;
+    std::set<PARTICLE_NUMBER> get_nearby_paticles(Particle &p) const;
 
-    std::vector<PARTICLE_NUMBER> get_nearby_paticles(Particle &p) const;
+    // Functions
+    void run(UINT32 step);
+    GRID get_grid(const vector3D &pos) const;
 
     static FLOAT kernel_poly6(vector3D r, FLOAT h);
     static vector3D kernel_spiky(vector3D r, FLOAT h);

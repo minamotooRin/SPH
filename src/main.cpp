@@ -1,9 +1,16 @@
-#include "SPH.h"
+#include "SPH_handle.h"
 
-int main()
-{   
-    SPH_handle handle( 1, 1, 1, 1000, "water");
-    handle.set_export_file("data.bin");
-    handle.run(1000);
+int main(int argc, char ** argv)
+{  
+    std::string ifile("input.json");
+    std::string ofile("output.bin");
+    if(argc > 1)
+        ifile = argv[1];
+    if(argc > 2)
+        ofile = argv[2];
+
+    SPH_handle handle(ifile, ofile);
+    handle.run();
+
     return 0;
 }

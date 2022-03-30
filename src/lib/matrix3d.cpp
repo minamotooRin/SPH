@@ -1,13 +1,37 @@
 #include "matrix3d.h"
 
+GRID::GRID()
+{
+    memset(grid, 0, sizeof(grid));
+}
+GRID::GRID(UINT32 x_, UINT32 y_, UINT32 z_)
+{
+    grid[0] = x_;
+    grid[1] = y_;
+    grid[2] = z_;
+}
+
 bool GRID::operator < (const GRID & g) const
 {
-    return x == g.x ? x < g.x : y == g.y ? y < g.y : z == g.z ? z < g.z : false;
+    for(auto it = 0; it < DIM; ++it)
+    {
+        if( grid[it] == g[it]) continue;
+        return grid[it] < g[it];
+    }
+    return false;
 }
 
 GRID GRID::operator+ (const GRID & g) const
 {
-    return GRID(x + g.x, y + g.y, z + g.z);
+    GRID ans = *this;
+    for(auto it = 0 ; it < DIM ; ++it)
+        ans[i] = ans[i] + g[i];
+    return ans;
+}
+
+UINT32& GRID::operator[](const UINT32 it)
+{
+    return grid[it];
 }
 
 vector3D::vector3D()
@@ -82,13 +106,4 @@ FLOAT vector3D::abs()
 FLOAT * vector3D::getData()
 {
     return data;
-}
-
-GRID vector3D::getfloor(FLOAT r) const
-{
-    return GRID(
-        static_cast<UINT32>(floor(data[0] / r)), 
-        static_cast<UINT32>(floor(data[1] / r)), 
-        static_cast<UINT32>(floor(data[2] / r))
-    );
 }
