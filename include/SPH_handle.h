@@ -36,7 +36,7 @@ private:
     std::string ifile;
     std::string ofile;
     parameter para;
-    ofstream ofs;
+    std::ofstream ofs;
 
     // Statistics
     UINT32 step_cnt;
@@ -45,15 +45,11 @@ private:
     // Facilities
     std::vector<Particle> particles;
     std::map< GRID, std::set<PARTICLE_NUMBER> > grid_2_particles;
-    std::set<PARTICLE_NUMBER> get_nearby_paticles(Particle &p) const;
+    const std::set<PARTICLE_NUMBER> get_nearby_paticles(Particle &p);
 
     // Functions
     void run(UINT32 step);
     GRID get_grid(const vector3D &pos) const;
-
-    static FLOAT kernel_poly6(vector3D r, FLOAT h);
-    static vector3D kernel_spiky(vector3D r, FLOAT h);
-    static FLOAT kernel_viscosity(FLOAT r, FLOAT h);
 
 };
 

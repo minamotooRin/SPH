@@ -16,6 +16,7 @@ struct GRID
     bool operator<(const GRID & g) const;
     GRID operator+ (const GRID & g) const;
     UINT32& operator[](const UINT32 it);
+    const UINT32& operator[](const UINT32 it) const;
 };
 
 struct vector3D
@@ -31,7 +32,9 @@ struct vector3D
     vector3D operator+ (const vector3D & v) const;
     vector3D operator- (const vector3D & v) const;
     FLOAT  operator* (const vector3D & v) const;
-    FLOAT& operator[] (const UINT32 it);
+    vector3D operator* (const FLOAT d) const;
+    FLOAT& operator[] (const int it);
+    const FLOAT& operator[] (const int it) const;
 
     FLOAT abs();
 

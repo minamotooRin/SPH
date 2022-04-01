@@ -1,5 +1,5 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef PARAMETER_H
+#define PARAMETER_H
 
 #include <string>
 #include <fstream>
@@ -11,8 +11,6 @@
 struct parameter
 {
 public:
-
-    parameter();
 
     parameter(std::string ifile)
     {

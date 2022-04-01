@@ -116,12 +116,12 @@ public:
     using float_type    = typename _JsonTy::float_type;
 
     explicit json_reader(error_handler* eh = nullptr)
-        : is_(nullptr)
-        , is_negative_(false)
+        : is_negative_(false)
         , number_integer_(0)
         , number_float_(0)
         , current_(0)
-        , err_handler_(eh)
+        , is_(nullptr)
+        , err_handler_(eh) 
     {
         is_ >> std::noskipws;
     }

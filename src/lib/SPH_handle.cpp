@@ -1,53 +1,14 @@
 #include "SPH_handle.h"
 
-#define _USE_MATH_DEFINES
-
-FLOAT SPH_handle::kernel_poly6(vector3D r, FLOAT h)
-{
-    FLOAT ans = 0;
-
-    FLOAT r_abs = r.abs();
-    if( h >= r_abs ) 
-        ans = 315*(h*h - r_abs*r_abs)*(h*h - r_abs*r_abs)*(h*h - r_abs*r_abs) / ( 64*M_PI*pow(h,9) )  ;
-
-    return ans;
-}
-
-vector3D SPH_handle::kernel_spiky(vector3D r, FLOAT h)
-{
-    vector3D ans();
-
-    FLOAT r_abs = r.abs();
-    if ( h >= r_abs )
-        ans = r * (-45*(h - r_abs)*(h - r_abs) / (r_abs * M_PI * pow(h,6))) ;
-
-    return ans;
-}
-
-FLOAT SPH_handle::kernel_viscosity(FLOAT r, FLOAT h)
-{
-    FLOAT ans = 0;
-
-    if ( h >= r.abs())
-        ans = 45 * (h - r.abs()) / (M_PI * pow(h, 6));
-
-    return ans;
-}
-
 SPH_handle::SPH_handle(std::string input, std::string output)
+: isReady(true), ifile(input), ofile(output), para(parameter(input))
 {
-    isReady = true;
-
-    ifile = input;
-    ofile = output;
-
-    para = parameter(input);
     if(!para.isReady)
     {
         isReady = false;
     }
 
-    ofs = ofstream(ofile);
+    ofs = std::ofstream(ofile);
     if(!ofs.good())
     {
         isReady = false;
@@ -70,7 +31,7 @@ SPH_handle::~SPH_handle()
 
 }
 
-std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p) const
+const std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p)
 {
     std::set<PARTICLE_NUMBER> ans;
 
@@ -85,8 +46,8 @@ std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p) const
         };
     for( GRID & dg : dgs)
     {
-        GRID g = p.grid + g;
-        for(PARTICLE_NUMBER it : grid_2_particles[g] )
+        GRID g = p.grid + dg;
+        for( PARTICLE_NUMBER it : grid_2_particles[g] )
         {
             if(distance_sqr(particles[it], p) < para.h_squre)
             {
@@ -120,10 +81,9 @@ void SPH_handle::run(UINT32 step)
         {
             Particle &p = particles[it];
 
-            const std::vector<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
+            const std::set<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
 
             grid_2_particles[p.grid].erase(it);
-            p.update(dt, matrial, particles, particles_numbers);
             grid_2_particles[p.grid].insert(it);
         }
 
@@ -131,10 +91,10 @@ void SPH_handle::run(UINT32 step)
         {
             Particle &p = particles[it];
 
-            const std::vector<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
+            const std::set<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
 
             grid_2_particles[p.grid].erase(it);
-            p.update(dt, matrial, particles, particles_numbers);
+            p.update(para, particles, particles_numbers);
             grid_2_particles[p.grid].insert(it);
         }
 

@@ -18,15 +18,20 @@ public:
     GRID grid;
     FLOAT rho;
 
-    void update(FLOAT dt, const Material &m, const std::vector<Particle> &particles, const std::vector<PARTICLE_NUMBER> &p_number_nearby);
+    void update(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
 
 private:
 
-    inline GRID get_grid(const Material &m) const;
-    FLOAT get_rho(const Material &m) const;
-    vector3D get_F_pressure(const Material &m) const;
-    vector3D get_F_viscosity(const Material &m) const;
-    vector3D get_F_tension(const Material &m) const;
+    FLOAT get_rho(const parameter &m) const;
+    vector3D get_F_pressure(const parameter &m) const;
+    vector3D get_F_viscosity(const parameter &m) const;
+    vector3D get_F_tension(const parameter &m) const;
+
+    static FLOAT kernel_poly6(vector3D r, FLOAT h);
+    static vector3D kernal_poly6_gradient(vector3D r , FLOAT h );
+    static FLOAT kernal_poly6_laplacian(vector3D r , FLOAT h );
+    static vector3D kernel_spiky_gradient(vector3D r, FLOAT h);
+    static FLOAT kernel_viscosity_laplacian(vector3D r, FLOAT h);
 
 };
 

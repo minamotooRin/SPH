@@ -25,11 +25,16 @@ GRID GRID::operator+ (const GRID & g) const
 {
     GRID ans = *this;
     for(auto it = 0 ; it < DIM ; ++it)
-        ans[i] = ans[i] + g[i];
+        ans[it] = ans[it] + g[it];
     return ans;
 }
 
 UINT32& GRID::operator[](const UINT32 it)
+{
+    return grid[it];
+}
+
+const UINT32& GRID::operator[](const UINT32 it) const
 {
     return grid[it];
 }
@@ -89,8 +94,20 @@ FLOAT vector3D::operator* (const vector3D & v) const
         ans += data[i] * v.data[i];
     return ans;
 }
+ vector3D vector3D::operator* (const FLOAT d) const
+ {
+    vector3D ans = *this;
+    for(auto i = 0 ; i < DIM ; ++i)
+        ans[i] = ans[i] * d;
+    return ans;
+ }
 
-FLOAT& vector3D::operator[] (const UINT32 it)
+FLOAT& vector3D::operator[] (const int it)
+{
+    return data[it];
+}
+
+const FLOAT& vector3D::operator[] (const int it) const
 {
     return data[it];
 }
