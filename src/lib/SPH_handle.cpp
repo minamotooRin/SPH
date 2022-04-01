@@ -31,7 +31,7 @@ SPH_handle::~SPH_handle()
 
 }
 
-const std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p)
+std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(PARTICLE_NUMBER p)
 {
     std::set<PARTICLE_NUMBER> ans;
 
@@ -46,10 +46,10 @@ const std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p)
         };
     for( GRID & dg : dgs)
     {
-        GRID g = p.grid + dg;
+        GRID g = particles[p].grid + dg;
         for( PARTICLE_NUMBER it : grid_2_particles[g] )
         {
-            if(distance_sqr(particles[it], p) < para.h_squre)
+            if(distance_sqr(particles[it], particles[p]) < para.h_squre)
             {
                 ans.insert(it);
             }
@@ -58,7 +58,6 @@ const std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(Particle &p)
 
     return ans;
 }
-
 
 void SPH_handle::run()
 {
@@ -76,25 +75,19 @@ void SPH_handle::run(UINT32 step)
 
     for(UINT32 s = 0 ; s < step; s ++)
     {
-        // update rho
+        std::map<PARTICLE_NUMBER, std::set<PARTICLE_NUMBER> > P_2_nearP;
+
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
-            Particle &p = particles[it];
-
-            const std::set<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
-
-            grid_2_particles[p.grid].erase(it);
-            grid_2_particles[p.grid].insert(it);
+            P_2_nearP[it] = get_nearby_paticles(it); // move construct
+            particles[it].update_rho(para, particles, P_2_nearP[it]);
         }
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
             Particle &p = particles[it];
-
-            const std::set<PARTICLE_NUMBER> particles_numbers = get_nearby_paticles(p); // move construct
-
             grid_2_particles[p.grid].erase(it);
-            p.update(para, particles, particles_numbers);
+            p.update(para, particles, P_2_nearP[it]);
             grid_2_particles[p.grid].insert(it);
         }
 

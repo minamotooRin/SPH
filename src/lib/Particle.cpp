@@ -61,7 +61,7 @@ void Particle::update(const parameter &m, const std::vector<Particle> &particles
 {
 }
 
-FLOAT Particle::get_rho(const parameter &m) const
+FLOAT Particle::update_rho(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
 {
     FLOAT ans = 0;
 

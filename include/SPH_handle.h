@@ -45,7 +45,7 @@ private:
     // Facilities
     std::vector<Particle> particles;
     std::map< GRID, std::set<PARTICLE_NUMBER> > grid_2_particles;
-    const std::set<PARTICLE_NUMBER> get_nearby_paticles(Particle &p);
+    std::set<PARTICLE_NUMBER> get_nearby_paticles(PARTICLE_NUMBER p);
 
     // Functions
     void run(UINT32 step);

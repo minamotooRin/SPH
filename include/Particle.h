@@ -18,11 +18,11 @@ public:
     GRID grid;
     FLOAT rho;
 
+    FLOAT update_rho(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
     void update(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
 
 private:
 
-    FLOAT get_rho(const parameter &m) const;
     vector3D get_F_pressure(const parameter &m) const;
     vector3D get_F_viscosity(const parameter &m) const;
     vector3D get_F_tension(const parameter &m) const;
