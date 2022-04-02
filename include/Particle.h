@@ -10,7 +10,7 @@ class Particle
 {
 public:
 
-    Particle(const vector3D pos_);
+    Particle(const parameter &para, const vector3D pos_);
     ~Particle();
 
     vector3D pos;
@@ -18,14 +18,16 @@ public:
     GRID grid;
     FLOAT rho;
 
-    FLOAT update_rho(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
-    void update(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
+    FLOAT update_rho(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
+    void update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
 
 private:
 
-    vector3D get_F_pressure(const parameter &m) const;
-    vector3D get_F_viscosity(const parameter &m) const;
-    vector3D get_F_tension(const parameter &m) const;
+    GRID update_grid(const parameter &para);
+
+    vector3D get_F_pressure(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const;
+    vector3D get_F_viscosity(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const;
+    vector3D get_F_tension(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const;
 
     static FLOAT kernel_poly6(vector3D r, FLOAT h);
     static vector3D kernal_poly6_gradient(vector3D r , FLOAT h );

@@ -17,5 +17,6 @@ then
     echo "Compile Error!"
     exit 1
 fi
-mv main ../
+cd ..
+
 echo "Compile done."

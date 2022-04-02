@@ -46,10 +46,9 @@ FLOAT Particle::kernel_viscosity_laplacian(vector3D r, FLOAT h)
     return ans;
 }
 
-
-Particle::Particle(const vector3D pos_):pos(pos_),v(vector3D())
+Particle::Particle(const parameter &para, const vector3D pos_):pos(pos_),v(vector3D())
 {
-
+    update_grid(para);
 }
 
 Particle::~Particle()
@@ -57,34 +56,105 @@ Particle::~Particle()
 
 }
 
-void Particle::update(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
-{
+void Particle::update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
+{ 
+    // accelerate
+    vector3D g;
+    g[DIM - 1] = -para.g;
+    
+    vector3D F = get_F_pressure(para, particles , p_number_nearby)
+        + get_F_viscosity(para, particles , p_number_nearby)
+        + get_F_tension(para, particles , p_number_nearby) 
+        + (g * rho) ;
+    
+    vector3D a  = F / rho ;
+    
+    // move
+    pos         = pos + v * para.dt + a * para.dt * para.dt / 2; 
+    v           = v + a * para.dt ; 
+
+    // bouce back
+    for(auto i = 0 ; i < DIM ; ++i)
+    {
+        if ( pos[i] >= para.volume[i] )
+        {
+            v[i] = - v[i] ;
+            pos[i] = 2 * para.volume[i] - pos[i];
+        } 
+        if ( pos[i] <= 0 )
+        {
+            v[i] = - v[i] ;
+            pos[i] = - pos[i];
+        } 
+    }
+
+    update_grid(para);
 }
 
-FLOAT Particle::update_rho(const parameter &m, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
+FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
 {
-    FLOAT ans = 0;
+    rho = 0;
 
-    return ans;
+    for(PARTICLE_NUMBER p : p_number_nearby)
+    {
+        rho += para.m * kernel_poly6(pos - particles[p].pos , para.h );
+    }
+
+    return rho;
 }
 
-vector3D Particle::get_F_pressure(const parameter &m) const
+GRID Particle::update_grid(const parameter &para)
+{   
+    grid = GRID(
+        static_cast<UINT32>(floor(pos[0] / para.h)), 
+        static_cast<UINT32>(floor(pos[1] / para.h)), 
+        static_cast<UINT32>(floor(pos[2] / para.h))
+    );
+    return grid;
+}
+
+vector3D Particle::get_F_pressure(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const
 {
     vector3D ans;
 
-    return ans;
-}
-vector3D Particle::get_F_viscosity(const parameter &m) const
-{
-    vector3D ans;
+    for (PARTICLE_NUMBER p : p_number_nearby)
+    {
+        const Particle &pa = particles[p];
+        ans += kernel_spiky_gradient( pos - pa.pos , para.h ) 
+            * para.m * (para.k * (pa.rho - para.rho0) + para.k*(rho - para.rho0)) / (2*pa.rho) ; 
+    }
+
+    ans = ans * -1 ; 
 
     return ans;
 }
-vector3D Particle::get_F_tension(const parameter &m) const
+vector3D Particle::get_F_viscosity(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const
 {
     vector3D ans;
 
+    for (PARTICLE_NUMBER p : p_number_nearby)
+    {
+        const Particle &pa = particles[p];
+        ans += ((pa.v - v) / pa.rho) * kernel_viscosity_laplacian(pos - pa.pos, para.h);
+    }
+
+    ans *= para.mu * para.m;
+
     return ans;
+}
+vector3D Particle::get_F_tension(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const
+{
+    vector3D cs_grad; 
+    FLOAT cs_lap = 0;
+
+    for (PARTICLE_NUMBER p : p_number_nearby)
+    {
+        const Particle & pa = particles[p];
+        cs_grad += kernal_poly6_gradient( pos - pa.pos , para.h ) * para.m / pa.rho ;
+        cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h ) * para.m / pa.rho ; 
+    }
+
+    return (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
 }
 
 FLOAT distance_sqr(const Particle &p1, const Particle &p2)

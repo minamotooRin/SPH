@@ -6,15 +6,15 @@
         "y" : 10,
         "z" : 10
     },
-    "paritcle_number" : 1000,
-    "step" : 1000,
+    "paritcle_number" : 500,
+    "step" : 5000,
     "dt" : 0.01,
     "gravity" : 9.81,
 
-    "mass" : 1,
-    "kernel_radius" : 1,
-    "viscosity" : 1,
-    "gas_constant" : 1,
-    "rest_desity" : 1,
-    "tension_coefficient" : 1
+    "mass" : 1.0,
+    "kernel_radius" : 1.0,
+    "viscosity" : 1.0,
+    "gas_constant" : 1.0,
+    "rest_desity" : 1.0,
+    "tension_coefficient" : 1.0
 }

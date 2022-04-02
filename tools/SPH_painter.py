@@ -1,5 +1,6 @@
 import sys
 import json
+import math
 import numpy as np
 from struct import unpack
 from matplotlib import pyplot as plt
@@ -18,6 +19,7 @@ def run(para_file, data_file):
     # size_b          = data_file.read(4)
     # size            = (unpack('I', size_b))[0] # int
     size    = load_dict["paritcle_number"]
+    print ("Number: ", size)
 
     size_per_batch  = size * DIM * FLOAT_BYTES
     data_b          = data_file.read(size_per_batch)
@@ -33,12 +35,19 @@ def run(para_file, data_file):
         # print(step_cnt)
         step_cnt += 1 
         
+        # data_raw    = unpack('fff' * size , data_b) # tuple
         data_raw    = unpack('ddd' * size , data_b) # tuple
         data        = np.asarray(data_raw)
         
         x           = data[0 : : 3]
         y           = data[1 : : 3]
         z           = data[2 : : 3]
+
+        # nan = list(filter(lambda it : math.isnan(it), x))\
+        #     + list(filter(lambda it : math.isnan(it), y))\
+        #     + list(filter(lambda it : math.isnan(it), z))
+        # if len(nan):
+        #     print(data)
         
         plt.cla()
         # selected coordinate

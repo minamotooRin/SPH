@@ -15,11 +15,11 @@ public:
     parameter(std::string ifile)
     {
         isReady = true;
-        std::ifstream ifs("sample.json");
+        std::ifstream ifs(ifile);
         if(ifs.good())
         {
             ifs >> j;
-            number = j["paritcle_number"].get<UINT32>();
+            number      = j["paritcle_number"].get<UINT32>();
             volume[0]   = j["volume"]["x"].get<FLOAT>();
             volume[1]   = j["volume"]["y"].get<FLOAT>();
             volume[2]   = j["volume"]["z"].get<FLOAT>();
@@ -41,6 +41,13 @@ public:
         {
             isReady = false;
         }
+    }
+
+    std::stringstream get_info()
+    {
+        std::stringstream s;
+        s << j;
+        return s;
     }
 
     bool isReady;

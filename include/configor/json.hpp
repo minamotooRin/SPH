@@ -653,12 +653,12 @@ public:
     };
 
     explicit json_writer(const args& args, error_handler* eh = nullptr)
-        : os_(nullptr)
+        : pretty_print_(args.indent > 0)
         , object_or_array_began_(false)
-        , pretty_print_(args.indent > 0)
         , last_token_(token_type::uninitialized)
         , args_(args)
         , indent_(args.indent, args.indent_char)
+        , os_(nullptr)
         , err_handler_(eh)
     {
     }

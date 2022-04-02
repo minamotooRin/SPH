@@ -214,6 +214,11 @@ void from_config(const _ConfTy& c, _Ty& v)
 template <typename _ConfTy, typename _Ty, typename std::enable_if<std::is_floating_point<_Ty>::value, int>::type = 0>
 void from_config(const _ConfTy& c, _Ty& v)
 {
+    if(c.is_integer())
+    {
+        v = static_cast<_Ty>(c.raw_value().data.number_integer);
+        return ;
+    }
     if (!c.is_float())
         throw make_conversion_error(c.type(), config_value_type::number_float);
     v = static_cast<_Ty>(c.raw_value().data.number_float);

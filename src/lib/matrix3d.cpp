@@ -50,11 +50,9 @@ vector3D::vector3D(const vector3D &v)
         data[i] = v[i];
     }
 }
-vector3D::vector3D(FLOAT x_, FLOAT y_, FLOAT z_)
+vector3D::vector3D(FLOAT v[DIM])
 {
-    data[0] = x_;
-    data[1] = y_;
-    data[2] = z_;
+    memcpy(data, v, sizeof(FLOAT) * DIM);
 }
 
 vector3D vector3D::operator/ (const vector3D & v) const
@@ -80,6 +78,13 @@ vector3D vector3D::operator+ (const vector3D & v) const
     return ans;
 }
 
+vector3D& vector3D::operator+= (const vector3D & v)
+{
+    for(auto i = 0 ; i < DIM ; ++i)
+        data[i] += v[i];
+    return *this;
+}
+
 vector3D vector3D::operator- (const vector3D & v) const
 {
     vector3D ans = *this;
@@ -101,6 +106,13 @@ FLOAT vector3D::operator* (const vector3D & v) const
         ans[i] = ans[i] * d;
     return ans;
  }
+
+vector3D& vector3D::operator*= (const FLOAT d)
+{
+    for(auto i = 0 ; i < DIM ; ++i)
+        data[i] *= d;
+    return *this;
+}
 
 FLOAT& vector3D::operator[] (const int it)
 {

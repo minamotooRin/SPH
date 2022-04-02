@@ -1,5 +1,5 @@
 build
+data
 .vscode
 test
 main
-output.bin

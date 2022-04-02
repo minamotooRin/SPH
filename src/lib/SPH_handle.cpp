@@ -19,10 +19,14 @@ SPH_handle::SPH_handle(std::string input, std::string output)
     srand(time(0));
     for(int it = 0; it < para.number; it++)
     {
-        FLOAT x_pos = para.volume[0]/3 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume[0]/3)));
-        FLOAT y_pos = para.volume[1]/3 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume[1]/3)));
-        FLOAT z_pos = para.volume[2]/3 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume[2]/3)));
-        particles.push_back( Particle( vector3D(x_pos, y_pos, z_pos) ) );
+        FLOAT pos[DIM];
+        for(auto d = 0 ; d < DIM; d++)
+        {
+            pos[d] = para.volume[d]/3 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume[d]/3)));
+        }
+        particles.push_back( Particle(para, vector3D(pos) ) );
+        grid_2_particles[particles.back().grid].insert(it);
+        ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
     }
 }
 
@@ -71,20 +75,25 @@ void SPH_handle::run(UINT32 step)
         return ;
     }
 
-    step_cnt += step;
-
     for(UINT32 s = 0 ; s < step; s ++)
     {
+        if (s % 100 == 0)
+        {
+            std::cout << s + step_cnt << " / " << step + step_cnt;
+            std::cout << "  cost time: " << timer.elapsed() << "ms";
+            std::cout << std::endl;
+        }
         std::map<PARTICLE_NUMBER, std::set<PARTICLE_NUMBER> > P_2_nearP;
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
-            P_2_nearP[it] = get_nearby_paticles(it); // move construct
+            P_2_nearP[it] = get_nearby_paticles(it); // move assign
             particles[it].update_rho(para, particles, P_2_nearP[it]);
         }
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
+            P_2_nearP[it].erase(it);
             Particle &p = particles[it];
             grid_2_particles[p.grid].erase(it);
             p.update(para, particles, P_2_nearP[it]);
@@ -96,13 +105,9 @@ void SPH_handle::run(UINT32 step)
             ofs.write(reinterpret_cast<const char*>(p.pos.getData()), sizeof(FLOAT) * DIM);
         }
     }
-}
+    std::cout << step + step_cnt << " / " << step + step_cnt;
+    std::cout << "  cost time: " << timer.elapsed() << "ms";
+    std::cout << std::endl;
 
-GRID SPH_handle::get_grid(const vector3D &pos) const
-{   
-    return GRID(
-        static_cast<UINT32>(floor(pos[0] / para.h)), 
-        static_cast<UINT32>(floor(pos[1] / para.h)), 
-        static_cast<UINT32>(floor(pos[2] / para.h))
-    );
+    step_cnt += step;
 }

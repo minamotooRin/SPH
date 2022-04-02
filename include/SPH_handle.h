@@ -9,6 +9,7 @@
 #include <random>
 #include <cmath>
 #include <fstream>
+#include <iostream>
 
 #include "Particle.h"
 #include "Timer.h"
@@ -49,7 +50,6 @@ private:
 
     // Functions
     void run(UINT32 step);
-    GRID get_grid(const vector3D &pos) const;
 
 };
 

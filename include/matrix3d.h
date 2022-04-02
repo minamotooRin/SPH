@@ -25,14 +25,16 @@ struct vector3D
 
     vector3D();
     vector3D(const vector3D &v);
-    vector3D(FLOAT x_, FLOAT y_, FLOAT z_);
+    vector3D(FLOAT v[DIM]);
 
     vector3D operator/ (const vector3D & v) const;
     vector3D operator/ (const FLOAT d) const;
     vector3D operator+ (const vector3D & v) const;
+    vector3D& operator+= (const vector3D & v) ;
     vector3D operator- (const vector3D & v) const;
     FLOAT  operator* (const vector3D & v) const;
     vector3D operator* (const FLOAT d) const;
+    vector3D& operator*= (const FLOAT d) ;
     FLOAT& operator[] (const int it);
     const FLOAT& operator[] (const int it) const;
 
