@@ -75,6 +75,8 @@ void SPH_handle::run(UINT32 step)
         return ;
     }
 
+    std::map<PARTICLE_NUMBER, std::set<PARTICLE_NUMBER> > P_2_nearP;
+    
     for(UINT32 s = 0 ; s < step; s ++)
     {
         if (s % 100 == 0)
@@ -83,7 +85,6 @@ void SPH_handle::run(UINT32 step)
             std::cout << "  cost time: " << timer.elapsed() << "ms";
             std::cout << std::endl;
         }
-        std::map<PARTICLE_NUMBER, std::set<PARTICLE_NUMBER> > P_2_nearP;
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {

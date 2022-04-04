@@ -1,4 +1,6 @@
 #include "Particle.h"
+#include <cfloat>
+#include <cmath>
 
 #define _USE_MATH_DEFINES
 
@@ -21,7 +23,7 @@ vector3D Particle::kernal_poly6_gradient(vector3D r , FLOAT h )
 FLOAT Particle::kernal_poly6_laplacian(vector3D r , FLOAT h )
 {
     FLOAT r_abs_sqr = r * r;
-    return - 945.0 / ( 32.0 * M_PI * pow(h, 9) ) * ( r_abs_sqr - h * h ) * ( 4 * r_abs_sqr + 3 * (r_abs_sqr - h * h )); 
+    return 945.0 / ( 32.0 * M_PI * pow(h, 9) ) * (h * h - r_abs_sqr) * ( 7 * r_abs_sqr - 3 * h * h ); 
 }
 
 vector3D Particle::kernel_spiky_gradient(vector3D r, FLOAT h)
@@ -154,7 +156,14 @@ vector3D Particle::get_F_tension(const parameter &para, const std::vector<Partic
         cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h ) * para.m / pa.rho ; 
     }
 
-    return (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
+    auto ans = (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
+
+    if(!std::isnormal(ans))
+    {
+        666;
+    }
+
+    return ans;
 }
 
 FLOAT distance_sqr(const Particle &p1, const Particle &p2)
