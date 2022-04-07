@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <cfloat>
 
 #include "common.h"
 
@@ -39,6 +40,8 @@ struct vector3D
     const FLOAT& operator[] (const int it) const;
 
     FLOAT abs();
+    FLOAT min_ele();
+    bool isnormal();
 
     FLOAT * getData();
 };

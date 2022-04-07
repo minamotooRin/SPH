@@ -7,4 +7,6 @@ typedef unsigned int UINT32;
 
 typedef UINT32 PARTICLE_NUMBER ;
 
+constexpr FLOAT ZERO = 1e-7;
+
 #endif

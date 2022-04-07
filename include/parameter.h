@@ -20,6 +20,7 @@ public:
         {
             ifs >> j;
             number      = j["paritcle_number"].get<UINT32>();
+            part        = j["centralization"].get<UINT32>();
             volume[0]   = j["volume"]["x"].get<FLOAT>();
             volume[1]   = j["volume"]["y"].get<FLOAT>();
             volume[2]   = j["volume"]["z"].get<FLOAT>();
@@ -54,6 +55,7 @@ public:
 
     vector3D volume;
     UINT32 number;
+    UINT32 part;
     UINT32 step;
     FLOAT dt; // integration timestep
     FLOAT g; // gravity

@@ -8,6 +8,12 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         isReady = false;
     }
 
+    if(ofile.empty())
+    {
+        ofile = std::to_string(para.number) + std::string("_") 
+            + std::to_string(para.step) 
+            + std::string(".bin");
+    }
     ofs = std::ofstream(ofile);
     if(!ofs.good())
     {
@@ -15,14 +21,31 @@ SPH_handle::SPH_handle(std::string input, std::string output)
     }
 
     step_cnt        = 0 ; 
+
+    int bottom_number = para.number / ((2 * para.part + 1) * (2 * para.part + 1) + 1);
     
     srand(time(0));
-    for(int it = 0; it < para.number; it++)
+    for(int it = 0; it < para.number - bottom_number; it++)
+    {
+        FLOAT pos[DIM];
+        for(auto d = 0 ; d < 2; d++)
+        {
+            pos[d] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele())));
+        }
+        pos[2] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
+    
+        particles.push_back( Particle(para, vector3D(pos) ) );
+        grid_2_particles[particles.back().grid].insert(it);
+        ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
+    }
+    for(int it = para.number - bottom_number; it < para.number; it++)
     {
         FLOAT pos[DIM];
         for(auto d = 0 ; d < DIM; d++)
         {
-            pos[d] = para.volume[d]/3 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume[d]/3)));
+            // why not uniform
+            pos[d] = para.part * para.volume[d] / (2.0 * para.part + 1)
+                + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
         }
         particles.push_back( Particle(para, vector3D(pos) ) );
         grid_2_particles[particles.back().grid].insert(it);
@@ -81,9 +104,8 @@ void SPH_handle::run(UINT32 step)
     {
         if (s % 100 == 0)
         {
-            std::cout << s + step_cnt << " / " << step + step_cnt;
-            std::cout << "  cost time: " << timer.elapsed() << "ms";
-            std::cout << std::endl;
+            std::cout << timer.elapsed() << "ms\t";
+            std::cout << s + step_cnt << " / " << step + step_cnt << std::endl;
         }
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
@@ -94,7 +116,7 @@ void SPH_handle::run(UINT32 step)
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
-            P_2_nearP[it].erase(it);
+            // P_2_nearP[it].erase(it); // cause overflow in kernel_spiky_gradient
             Particle &p = particles[it];
             grid_2_particles[p.grid].erase(it);
             p.update(para, particles, P_2_nearP[it]);
@@ -106,9 +128,8 @@ void SPH_handle::run(UINT32 step)
             ofs.write(reinterpret_cast<const char*>(p.pos.getData()), sizeof(FLOAT) * DIM);
         }
     }
-    std::cout << step + step_cnt << " / " << step + step_cnt;
-    std::cout << "  cost time: " << timer.elapsed() << "ms";
-    std::cout << std::endl;
+    std::cout << timer.elapsed() << "ms\t";
+    std::cout << step + step_cnt << " / " << step + step_cnt << std::endl;
 
     step_cnt += step;
 }

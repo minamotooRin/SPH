@@ -1,6 +1,4 @@
 #include "Particle.h"
-#include <cfloat>
-#include <cmath>
 
 #define _USE_MATH_DEFINES
 
@@ -9,7 +7,7 @@ FLOAT Particle::kernel_poly6(vector3D r, FLOAT h)
     FLOAT ans = 0;
 
     FLOAT r_abs_sqr = r * r;
-    if( h * h >= r_abs_sqr ) 
+    if( h * h > r_abs_sqr ) 
         ans = 315*(h*h - r_abs_sqr)*(h*h - r_abs_sqr)*(h*h - r_abs_sqr) / ( 64*M_PI*pow(h,9) )  ;
 
     return ans;
@@ -31,7 +29,7 @@ vector3D Particle::kernel_spiky_gradient(vector3D r, FLOAT h)
     vector3D ans;
 
     FLOAT r_abs = r.abs();
-    if ( h >= r_abs )
+    if ( r_abs > ZERO && h > r_abs )
         ans = r * -45 * (h - r_abs) * (h - r_abs) / (r_abs * M_PI * pow(h,6)) ;
 
     return ans;
@@ -78,15 +76,15 @@ void Particle::update(const parameter &para, const std::vector<Particle> &partic
     // bouce back
     for(auto i = 0 ; i < DIM ; ++i)
     {
-        if ( pos[i] >= para.volume[i] )
+        pos[i] = fmod( pos[i], 2 * para.volume[i]);
+        if ( pos[i] < ZERO )
         {
-            v[i] = - v[i] ;
-            pos[i] = 2 * para.volume[i] - pos[i];
+            pos[i] += 2 * para.volume[i];
         } 
-        if ( pos[i] <= 0 )
+        if ( pos[i] > para.volume[i] )
         {
-            v[i] = - v[i] ;
-            pos[i] = - pos[i];
+            v[i] *= -1;
+            pos[i] = 2 * para.volume[i] - pos[i];
         } 
     }
 
@@ -123,7 +121,7 @@ vector3D Particle::get_F_pressure(const parameter &para, const std::vector<Parti
     {
         const Particle &pa = particles[p];
         ans += kernel_spiky_gradient( pos - pa.pos , para.h ) 
-            * para.m * (para.k * (pa.rho - para.rho0) + para.k*(rho - para.rho0)) / (2*pa.rho) ; 
+            * para.m * (para.k * (pa.rho - para.rho0) + para.k * (rho - para.rho0)) / (2*pa.rho) ; 
     }
 
     ans = ans * -1 ; 
@@ -146,6 +144,8 @@ vector3D Particle::get_F_viscosity(const parameter &para, const std::vector<Part
 }
 vector3D Particle::get_F_tension(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const
 {
+    vector3D ans;
+
     vector3D cs_grad; 
     FLOAT cs_lap = 0;
 
@@ -156,12 +156,7 @@ vector3D Particle::get_F_tension(const parameter &para, const std::vector<Partic
         cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h ) * para.m / pa.rho ; 
     }
 
-    auto ans = (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
-
-    if(!std::isnormal(ans))
-    {
-        666;
-    }
+    if (cs_grad.abs() > ZERO) ans = (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
 
     return ans;
 }

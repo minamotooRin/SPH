@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(SPH)
 
-add_definitions("-Wall -std=c++14 -O3") # 编译选项
+add_definitions("-Wall -std=c++17 -O3") # 编译选项
 # add_definitions("-Wall -std=c++17 -O0 -g") # 编译选项
 
 # 打印信息

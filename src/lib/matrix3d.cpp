@@ -132,6 +132,22 @@ FLOAT vector3D::abs()
     return sqrt(ans);
 } 
 
+FLOAT vector3D::min_ele()
+{
+    FLOAT ans = data[0];
+    for(FLOAT it : data)
+        ans = ans < it ? ans : it;
+    return ans;
+}
+
+bool vector3D::isnormal()
+{
+    for(FLOAT it : data)
+        if(!std::isnormal(it))
+            return false;
+    return true;
+}
+
 FLOAT * vector3D::getData()
 {
     return data;

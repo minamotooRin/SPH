@@ -3,7 +3,7 @@
 int main(int argc, char ** argv)
 {  
     std::string ifile("input.json");
-    std::string ofile("output.bin");
+    std::string ofile("");
     if(argc > 1)
         ifile = argv[1];
     if(argc > 2)
