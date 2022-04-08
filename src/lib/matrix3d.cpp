@@ -4,11 +4,9 @@ GRID::GRID()
 {
     memset(grid, 0, sizeof(grid));
 }
-GRID::GRID(UINT32 x_, UINT32 y_, UINT32 z_)
+GRID::GRID(UINT32 v[DIM])
 {
-    grid[0] = x_;
-    grid[1] = y_;
-    grid[2] = z_;
+    memcpy(grid, v, sizeof(UINT32) * DIM);
 }
 
 bool GRID::operator < (const GRID & g) const
@@ -122,6 +120,15 @@ FLOAT& vector3D::operator[] (const int it)
 const FLOAT& vector3D::operator[] (const int it) const
 {
     return data[it];
+}
+
+
+void vector3D::print()
+{
+    std::cout << "(";
+    for(FLOAT it : data)
+        std::cout << it << ", ";
+    std::cout << ")" << std::endl;
 }
 
 FLOAT vector3D::abs()

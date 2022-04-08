@@ -4,15 +4,16 @@
 #include <cmath>
 #include <cstring>
 #include <cfloat>
+#include <iostream>
 
 #include "common.h"
 
-#define DIM 3
+// #define DIM 3 // Define in Cmakelists
 
 struct GRID
 {
     GRID();
-    GRID(UINT32 x_, UINT32 y_, UINT32 z_);
+    GRID(UINT32 v[DIM]);
     UINT32 grid[DIM];
     bool operator<(const GRID & g) const;
     GRID operator+ (const GRID & g) const;
@@ -39,6 +40,7 @@ struct vector3D
     FLOAT& operator[] (const int it);
     const FLOAT& operator[] (const int it) const;
 
+    void print();
     FLOAT abs();
     FLOAT min_ele();
     bool isnormal();

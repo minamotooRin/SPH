@@ -62,12 +62,14 @@ void Particle::update(const parameter &para, const std::vector<Particle> &partic
     vector3D g;
     g[DIM - 1] = -para.g;
     
-    vector3D F = get_F_pressure(para, particles , p_number_nearby)
-        + get_F_viscosity(para, particles , p_number_nearby)
-        + get_F_tension(para, particles , p_number_nearby) 
-        + (g * rho) ;
+    vector3D F_pressure = get_F_pressure(para, particles , p_number_nearby);
+    vector3D F_viscosity = get_F_viscosity(para, particles , p_number_nearby);
+    vector3D F_tension = get_F_tension(para, particles , p_number_nearby);
+    vector3D F_G = g * rho;
+
+    // std::cout << F_pressure.abs() << "\t" << F_viscosity.abs() << "\t" << F_tension.abs() << "\t" << F_G.abs() << std::endl;
     
-    vector3D a  = F / rho ;
+    vector3D a  = (F_pressure + F_viscosity + F_tension + F_G) / rho ;
     
     // move
     pos         = pos + v * para.dt + a * para.dt * para.dt / 2; 
@@ -105,11 +107,12 @@ FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &p
 
 GRID Particle::update_grid(const parameter &para)
 {   
-    grid = GRID(
-        static_cast<UINT32>(floor(pos[0] / para.h)), 
-        static_cast<UINT32>(floor(pos[1] / para.h)), 
-        static_cast<UINT32>(floor(pos[2] / para.h))
-    );
+    UINT32 arr[DIM];
+    for(int i = 0; i < DIM; ++i)
+    {
+        arr[i] = static_cast<UINT32>(floor(pos[i] / para.h));
+    }
+    grid = GRID(arr);
     return grid;
 }
 

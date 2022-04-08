@@ -23,7 +23,7 @@ public:
             part        = j["centralization"].get<UINT32>();
             volume[0]   = j["volume"]["x"].get<FLOAT>();
             volume[1]   = j["volume"]["y"].get<FLOAT>();
-            volume[2]   = j["volume"]["z"].get<FLOAT>();
+            if(DIM == 3) volume[2]   = j["volume"]["z"].get<FLOAT>();
             step        = j["step"].get<UINT32>();
             dt          = j["dt"].get<FLOAT>();
             g           = j["gravity"].get<FLOAT>();

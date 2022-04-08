@@ -6,6 +6,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
     if(!para.isReady)
     {
         isReady = false;
+        return ;
     }
 
     if(ofile.empty())
@@ -22,17 +23,30 @@ SPH_handle::SPH_handle(std::string input, std::string output)
 
     step_cnt        = 0 ; 
 
-    int bottom_number = para.number / ((2 * para.part + 1) * (2 * para.part + 1) + 1);
+    auto power = [](UINT32 b, UINT32 x) -> UINT32
+    {
+        UINT32 ans = 1;
+        constexpr UINT32 m = 1e7+ 7;
+        while (x > 0)
+        {
+            if (x & 1)
+                ans = ans * b % m;
+            b = b * b % m;
+            x >>= 1;
+        }
+        return ans;
+    };
+    UINT32 bottom_number = para.number / (power( 2 * para.part + 1, DIM - 1) + 1);
     
     srand(time(0));
     for(int it = 0; it < para.number - bottom_number; it++)
     {
         FLOAT pos[DIM];
-        for(auto d = 0 ; d < 2; d++)
+        for(auto d = 0 ; d < DIM - 1; d++)
         {
             pos[d] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele())));
         }
-        pos[2] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
+        pos[DIM - 1] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
     
         particles.push_back( Particle(para, vector3D(pos) ) );
         grid_2_particles[particles.back().grid].insert(it);
@@ -62,16 +76,23 @@ std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(PARTICLE_NUMBER p)
 {
     std::set<PARTICLE_NUMBER> ans;
 
-    static GRID dgs[7] = {
-        GRID(0,0,0), 
-        GRID(1,0,0), 
-        GRID(0,1,0), 
-        GRID(0,0,1),
-        GRID(-1,0,0), 
-        GRID(0,-1,0),
-        GRID(0,0,-1)
-        };
-    for( GRID & dg : dgs)
+    const static std::vector<GRID> dgs = [&](){
+        std::vector<GRID> ans;
+
+        UINT32 arr[DIM] = {0};
+        ans.push_back(GRID(arr)); // 0 0 0 ...
+        for(int i = 0; i < DIM; ++i)
+        {
+            memset(arr, 0, sizeof(arr));
+            arr[i] = 1;
+            ans.push_back(GRID(arr));
+            arr[i] = -1;
+            ans.push_back(GRID(arr));
+        }
+
+        return ans;
+    }();
+    for( const GRID & dg : dgs)
     {
         GRID g = particles[p].grid + dg;
         for( PARTICLE_NUMBER it : grid_2_particles[g] )
