@@ -5,7 +5,7 @@ import numpy as np
 from struct import unpack
 from matplotlib import pyplot as plt
 
-DIM = 2
+DIM = 3
 FLOAT_BYTES = 8
 
 def draw2D(load_dict, data_file):
@@ -96,7 +96,7 @@ def draw3D(load_dict, data_file):
         ax3.set_xlim(x_range)
         ax3.set_ylim(y_range)
         ax3.set_zlim(z_range)
-        ax3.scatter(x, y, z, alpha=0.1)
+        ax3.scatter(x, y, z, alpha=0.05)
         plt.pause(dt)
         
         data_b      = data_file.read(size_per_batch)

@@ -29,8 +29,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         constexpr UINT32 m = 1e7+ 7;
         while (x > 0)
         {
-            if (x & 1)
-                ans = ans * b % m;
+            if (x & 1) ans = ans * b % m;
             b = b * b % m;
             x >>= 1;
         }
@@ -57,7 +56,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         FLOAT pos[DIM];
         for(auto d = 0 ; d < DIM; d++)
         {
-            // why not uniform
+            // why not uniform ???
             pos[d] = para.part * para.volume[d] / (2.0 * para.part + 1)
                 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
         }

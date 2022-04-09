@@ -1,3 +1,9 @@
+if [ $1 != "" ]
+then
+ echo $1
+  sed -i 's/-DDIM=./-DDIM=$1/g'
+fi
+
 if [ -d "build" ]; then
   rm -rf build
 fi
