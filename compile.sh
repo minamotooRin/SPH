@@ -1,7 +1,6 @@
-if [ $1 != "" ]
+if [ "$1_" != "_" ]
 then
- echo $1
-  sed -i 's/-DDIM=./-DDIM=$1/g'
+  sed -i "" "s/-DDIM=./-DDIM=$1/g" CMakeLists.txt
 fi
 
 if [ -d "build" ]; then

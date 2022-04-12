@@ -15,11 +15,14 @@ public:
 
     vector3D pos;
     vector3D v; // velocity
+    vector3D pos_next;
+    vector3D v_next; // velocity
     GRID grid;
     FLOAT rho;
 
     FLOAT update_rho(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
-    void update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
+    void calc(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
+    void update(const parameter &para);
 
 private:
 

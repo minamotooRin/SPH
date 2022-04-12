@@ -137,14 +137,15 @@ void SPH_handle::run(UINT32 step)
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
             // P_2_nearP[it].erase(it); // cause overflow in kernel_spiky_gradient
-            Particle &p = particles[it];
-            grid_2_particles[p.grid].erase(it);
-            p.update(para, particles, P_2_nearP[it]);
-            grid_2_particles[p.grid].insert(it);
+            particles[it].calc(para, particles, P_2_nearP[it]);
         }
 
-        for(Particle &p : particles)
+        for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
+            Particle &p = particles[it];
+            grid_2_particles[p.grid].erase(it);
+            p.update(para);
+            grid_2_particles[p.grid].insert(it);
             ofs.write(reinterpret_cast<const char*>(p.pos.getData()), sizeof(FLOAT) * DIM);
         }
     }

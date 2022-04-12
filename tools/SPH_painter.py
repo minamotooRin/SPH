@@ -5,7 +5,7 @@ import numpy as np
 from struct import unpack
 from matplotlib import pyplot as plt
 
-DIM = 3
+DIM = 2
 FLOAT_BYTES = 8
 
 def draw2D(load_dict, data_file):
