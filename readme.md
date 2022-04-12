@@ -1,11 +1,19 @@
-# SPH
+# Particle-Based-Fluid-Simulation
 
-#TODO
+## Usage
 
-- multi thread
-- logging
-- initial position generator
-- SPH_painter.py : read a large batch per loading.
-- SPH_painter.py : Anime
+You could compile code with `sh compile.sh 2` for generating 2-Dimension solver or `sh compile.sh 3` for 3-Dimension solver.
+After modifying parameters in `tools/input.json`, just execute following commands:
 
-- BUG: unexpectable acceleration
+```
+build/main tools/input.json
+python3 build/SPH_painter.py tools/input.json
+```
+
+Results would like:
+
+![Figure_1](.assets/Figure_1.png "Figure_1")
+![Figure_2](.assets/Figure_2.png "Figure_2")
+
+## TODO
+- Adding multi thread support.
