@@ -21,6 +21,9 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         isReady = false;
     }
 
+    char dim = DIM;
+    ofs.write(&dim, sizeof(dim));
+
     step_cnt        = 0 ; 
 
     auto power = [](UINT32 b, UINT32 x) -> UINT32

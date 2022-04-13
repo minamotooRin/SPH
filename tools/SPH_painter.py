@@ -1,12 +1,10 @@
 import sys
 import json
-import math
 import numpy as np
 from struct import unpack
 from matplotlib import pyplot as plt
 
-DIM = 2
-FLOAT_BYTES = 8
+global FLOAT_BYTES
 
 def draw2D(load_dict, data_file):
 
@@ -123,6 +121,12 @@ if __name__ == "__main__":
             data_file_path = "{}_{}.bin".format(load_dict["paritcle_number"], load_dict["step"])
 
         with open( data_file_path, 'rb' ) as data_file:
+
+            data_raw = (unpack('c', data_file.read(1)))
+            DIM     = int.from_bytes(data_raw[0], byteorder='big', signed=True)
+
+            FLOAT_BYTES = 8
+
             if DIM == 2 :
                 draw2D(load_dict, data_file)
             elif DIM == 3:
