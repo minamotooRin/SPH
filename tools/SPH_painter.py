@@ -1,3 +1,4 @@
+from ctypes.wintypes import FLOAT
 import sys
 import json
 import numpy as np
@@ -5,6 +6,7 @@ from struct import unpack
 from matplotlib import pyplot as plt
 
 global FLOAT_BYTES
+global DIM
 
 def draw2D(load_dict, data_file):
 
@@ -32,8 +34,10 @@ def draw2D(load_dict, data_file):
         # print(step_cnt)
         step_cnt += 1 
         
-        # data_raw    = unpack('ff' * size , data_b) # tuple
-        data_raw    = unpack('dd' * size , data_b) # tuple
+        data_type = 'f'
+        if FLOAT_BYTES == 8:
+            data_type = 'd'
+        data_raw    = unpack(data_type * DIM * size , data_b) # tuple
         data        = np.asarray(data_raw)
         
         x           = data[0 : : 2]
@@ -80,9 +84,12 @@ def draw3D(load_dict, data_file):
 
         # print(step_cnt)
         step_cnt += 1 
+
+        data_type = 'f'
+        if FLOAT_BYTES == 8:
+            data_type = 'd'
         
-        # data_raw    = unpack('fff' * size , data_b) # tuple
-        data_raw    = unpack('ddd' * size , data_b) # tuple
+        data_raw    = unpack(data_type * DIM * size , data_b) # tuple
         data        = np.asarray(data_raw)
         
         x           = data[0 : : 3]
