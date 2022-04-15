@@ -4,7 +4,7 @@
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
-typedef double FLOAT;
+typedef float FLOAT;
 typedef unsigned short UINT8;
 typedef unsigned int UINT32;
 

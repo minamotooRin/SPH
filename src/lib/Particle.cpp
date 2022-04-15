@@ -128,10 +128,10 @@ vector3D Particle::get_F_pressure(const parameter &para, const std::vector<Parti
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle &pa = particles[p];
-        ans -= kernel_spiky_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9) * (pa.rho + rho - para.rho0_2) / (2*pa.rho) ; 
+        ans += kernel_spiky_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9) * (pa.rho + rho - para.rho0_2) / (2*pa.rho) ; 
     }
 
-    ans *= para.k_m;
+    ans *= - para.k_m;
 
     return ans;
 }
