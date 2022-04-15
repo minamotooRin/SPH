@@ -16,6 +16,7 @@ struct GRID
     GRID(UINT32 v[DIM]);
     UINT32 grid[DIM];
     bool operator<(const GRID & g) const;
+    bool operator!=(const GRID & g) const;
     GRID operator+ (const GRID & g) const;
     UINT32& operator[](const UINT32 it);
     const UINT32& operator[](const UINT32 it) const;
@@ -33,6 +34,7 @@ struct vector3D
     vector3D operator/ (const FLOAT d) const;
     vector3D operator+ (const vector3D & v) const;
     vector3D& operator+= (const vector3D & v) ;
+    vector3D& operator-= (const vector3D & v) ;
     vector3D operator- (const vector3D & v) const;
     FLOAT  operator* (const vector3D & v) const;
     vector3D operator* (const FLOAT d) const;

@@ -35,8 +35,13 @@ public:
             rho0        = j["rest_desity"].get<FLOAT>();
             sigma       = j["tension_coefficient"].get<FLOAT>();
 
-            h_squre = h * h;
-            h_cubic = h_squre * h;
+            dt2     = dt * dt;
+            h2      = h * h;
+            h6      = h2 * h2 * h2;
+            h9      = h6 * h2 * h;
+            mu_m    = mu * m;
+            k_m     = k * m;
+            rho0_2  = rho0 + rho0;
         }
         else
         {
@@ -67,8 +72,13 @@ public:
     FLOAT rho0; // rest desity
     FLOAT sigma; // tension coefficient
 
-    FLOAT h_squre;
-    FLOAT h_cubic;
+    FLOAT dt2;
+    FLOAT h2;
+    FLOAT h6;
+    FLOAT h9;
+    FLOAT mu_m;
+    FLOAT k_m;
+    FLOAT rho0_2;
 
 private:
 

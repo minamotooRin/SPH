@@ -2,47 +2,48 @@
 
 #define _USE_MATH_DEFINES
 
-FLOAT Particle::kernel_poly6(vector3D r, FLOAT h)
+FLOAT Particle::kernel_poly6(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
 {
     FLOAT ans = 0;
     FLOAT r_abs_sqr = r * r;
-    if( h * h > r_abs_sqr ) 
-        ans = 315*(h*h - r_abs_sqr)*(h*h - r_abs_sqr)*(h*h - r_abs_sqr) / ( 64*M_PI*pow(h,9) )  ;
+    if(likely( h2 > r_abs_sqr ) )
+        ans = 315*(h2 - r_abs_sqr)*(h2 - r_abs_sqr)*(h2 - r_abs_sqr) / ( 64*M_PI* h9 )  ;
     return ans;
 }
 
-vector3D Particle::kernal_poly6_gradient(vector3D r , FLOAT h )
+vector3D Particle::kernal_poly6_gradient(vector3D &&r , FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
 {
     vector3D ans;
-    if(h *h >  r * r)
-        ans = r * -945.0/ ( 32.0 * M_PI * pow(h,9) ) * pow((h*h - r * r ), 2) ;
+    FLOAT r_abs_sqr = r * r;
+    if(likely(h2 >  r_abs_sqr))
+        ans = r * - 945.0/ ( 32.0 * M_PI * h9 ) * (h2 - r_abs_sqr) * (h2 - r_abs_sqr) ;
     return ans;
 }
 
-FLOAT Particle::kernal_poly6_laplacian(vector3D r , FLOAT h )
+FLOAT Particle::kernal_poly6_laplacian(vector3D &&r , FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
 {
     FLOAT ans = 0;
     FLOAT r_abs_sqr = r * r;
-    if(h *h > r_abs_sqr)
-        ans =  945.0 / ( 32.0 * M_PI * pow(h, 9) ) * (h * h - r_abs_sqr) * ( 7 * r_abs_sqr - 3 * h * h ); 
+    if(likely(h2 > r_abs_sqr))
+        ans =  945.0 / ( 32.0 * M_PI * h9 ) * (h2 - r_abs_sqr) * ( 7 * r_abs_sqr - 3 * h2 ); 
     return ans;
 }
 
-vector3D Particle::kernel_spiky_gradient(vector3D r, FLOAT h)
+vector3D Particle::kernel_spiky_gradient(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
 {
     vector3D ans;
     FLOAT r_abs = r.abs();
-    if ( r_abs > ZERO && h > r_abs )
-        ans = r * -45 * (h - r_abs) * (h - r_abs) / (r_abs * M_PI * pow(h,6)) ;
+    if (likely( r_abs > ZERO && h > r_abs ))
+        ans = r * -45 * (h - r_abs) * (h - r_abs) / (r_abs * M_PI * h6) ;
     return ans;
 }
 
-FLOAT Particle::kernel_viscosity_laplacian(vector3D r, FLOAT h)
+FLOAT Particle::kernel_viscosity_laplacian(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
 {
     FLOAT ans = 0;
     FLOAT r_abs = r.abs();
-    if ( h >= r_abs)
-        ans = 45 * (h - r_abs) / (M_PI * pow(h, 6));
+    if (likely( h >= r_abs))
+        ans = 45 * (h - r_abs) / (M_PI * h6);
     return ans;
 }
 
@@ -58,29 +59,7 @@ Particle::~Particle()
 
 }
 
-void Particle::update(const parameter &para)
-{
-    pos = pos_next;
-    v   = v_next;
-    // bouce back
-    for(auto i = 0 ; i < DIM ; ++i)
-    {
-        pos[i] = fmod( pos[i], 2 * para.volume[i]);
-        if ( pos[i] < ZERO )
-        {
-            pos[i] += 2 * para.volume[i];
-        } 
-        if ( pos[i] > para.volume[i] )
-        {
-            v[i] *= -1;
-            pos[i] = 2 * para.volume[i] - pos[i];
-        } 
-    }
-
-    update_grid(para);
-}
-
-void Particle::calc(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
+void Particle::update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
 { 
     // accelerate
     vector3D g;
@@ -96,8 +75,25 @@ void Particle::calc(const parameter &para, const std::vector<Particle> &particle
     vector3D a  = (F_pressure + F_viscosity + F_tension + F_G) / rho ;
     
     // move
-    pos_next         = pos + v * para.dt + a * para.dt * para.dt / 2; 
-    v_next           = v + a * para.dt ; 
+    pos         = pos + v * para.dt + a * para.dt2 / 2; 
+    v           = v + a * para.dt ; 
+
+    // bouce back
+    for(auto i = 0 ; i < DIM ; ++i)
+    {
+        pos[i] = fmod( pos[i], 2 * para.volume[i]);
+        if (pos[i] < ZERO )
+        {
+            pos[i] += 2 * para.volume[i];
+        } 
+        if (pos[i] > para.volume[i] )
+        {
+            v[i] *= -1;
+            pos[i] = 2 * para.volume[i] - pos[i];
+        } 
+    }
+
+    update_grid(para);
 }
 
 FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
@@ -106,8 +102,10 @@ FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &p
 
     for(PARTICLE_NUMBER p : p_number_nearby)
     {
-        rho += para.m * kernel_poly6(pos - particles[p].pos , para.h );
+        rho += kernel_poly6(pos - particles[p].pos , para.h, para.h2, para.h6, para.h9);
     }
+
+    rho *= para.m;
 
     return rho;
 }
@@ -130,11 +128,10 @@ vector3D Particle::get_F_pressure(const parameter &para, const std::vector<Parti
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle &pa = particles[p];
-        ans += kernel_spiky_gradient( pos - pa.pos , para.h ) 
-            * para.m * (para.k * (pa.rho - para.rho0) + para.k * (rho - para.rho0)) / (2*pa.rho) ; 
+        ans -= kernel_spiky_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9) * (pa.rho + rho - para.rho0_2) / (2*pa.rho) ; 
     }
 
-    ans = ans * -1 ; 
+    ans *= para.k_m;
 
     return ans;
 }
@@ -145,10 +142,10 @@ vector3D Particle::get_F_viscosity(const parameter &para, const std::vector<Part
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle &pa = particles[p];
-        ans += ((pa.v - v) / pa.rho) * kernel_viscosity_laplacian(pos - pa.pos, para.h);
+        ans += ((pa.v - v) / pa.rho) * kernel_viscosity_laplacian(pos - pa.pos, para.h, para.h2, para.h6, para.h9);
     }
 
-    ans *= para.mu * para.m;
+    ans *= para.mu_m;
 
     return ans;
 }
@@ -162,11 +159,14 @@ vector3D Particle::get_F_tension(const parameter &para, const std::vector<Partic
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle & pa = particles[p];
-        cs_grad += kernal_poly6_gradient( pos - pa.pos , para.h ) * para.m / pa.rho ;
-        cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h ) * para.m / pa.rho ; 
+        cs_grad += kernal_poly6_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9 ) / pa.rho ;
+        cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h, para.h2, para.h6, para.h9 ) / pa.rho ; 
     }
 
-    if (cs_grad.abs() > ZERO) ans = (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
+    cs_grad *= para.m;
+    cs_lap *= para.m;
+
+    if (likely(cs_grad.abs() > ZERO)) ans = (cs_grad / cs_grad.abs()) * ( -para.sigma ) * cs_lap ;
 
     return ans;
 }

@@ -18,4 +18,5 @@ Results would be like:
 
 ## TODO
 - Adding multi thread support.
+- Dimension in config.
 - Adding Animation.

@@ -21,8 +21,8 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         isReady = false;
     }
 
-    char dim = DIM;
-    ofs.write(&dim, sizeof(dim));
+    char meta_info[2] = {DIM, sizeof(FLOAT)};
+    ofs.write(meta_info, sizeof(meta_info));
 
     step_cnt        = 0 ; 
 
@@ -99,7 +99,7 @@ std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(PARTICLE_NUMBER p)
         GRID g = particles[p].grid + dg;
         for( PARTICLE_NUMBER it : grid_2_particles[g] )
         {
-            if(distance_sqr(particles[it], particles[p]) < para.h_squre)
+            if(distance_sqr(particles[it], particles[p]) < para.h2)
             {
                 ans.insert(it);
             }
@@ -122,6 +122,7 @@ void SPH_handle::run(UINT32 step)
     }
 
     std::map<PARTICLE_NUMBER, std::set<PARTICLE_NUMBER> > P_2_nearP;
+    std::vector<Particle> particles_dup;
     
     for(UINT32 s = 0 ; s < step; s ++)
     {
@@ -137,17 +138,13 @@ void SPH_handle::run(UINT32 step)
             particles[it].update_rho(para, particles, P_2_nearP[it]);
         }
 
-        for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
-        {
-            // P_2_nearP[it].erase(it); // cause overflow in kernel_spiky_gradient
-            particles[it].calc(para, particles, P_2_nearP[it]);
-        }
+        particles_dup = particles;
 
         for(PARTICLE_NUMBER it = 0 ; it < particles.size(); it ++)
         {
             Particle &p = particles[it];
             grid_2_particles[p.grid].erase(it);
-            p.update(para);
+            p.update(para, particles_dup, P_2_nearP[it]);
             grid_2_particles[p.grid].insert(it);
             ofs.write(reinterpret_cast<const char*>(p.pos.getData()), sizeof(FLOAT) * DIM);
         }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(SPH)
 
-add_definitions(-DDIM=3)
+add_definitions(-DDIM=2)
 
 # SET(DEBUG_MODE TRUE)
 

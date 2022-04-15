@@ -9,6 +9,15 @@ GRID::GRID(UINT32 v[DIM])
     memcpy(grid, v, sizeof(UINT32) * DIM);
 }
 
+bool GRID::operator!=(const GRID & g) const
+{
+    for(auto it = 0; it < DIM; ++it)
+    {
+        if( grid[it] != g[it]) return true;
+    }
+    return false;
+}
+
 bool GRID::operator < (const GRID & g) const
 {
     for(auto it = 0; it < DIM; ++it)
@@ -43,14 +52,11 @@ vector3D::vector3D()
 }
 vector3D::vector3D(const vector3D &v)
 {
-    for(auto i = 0 ; i < DIM ; ++i)
-    {
-        data[i] = v[i];
-    }
+    memcpy(data, v.data, sizeof(data));
 }
 vector3D::vector3D(FLOAT v[DIM])
 {
-    memcpy(data, v, sizeof(FLOAT) * DIM);
+    memcpy(data, v, sizeof(data));
 }
 
 vector3D vector3D::operator/ (const vector3D & v) const
@@ -80,6 +86,13 @@ vector3D& vector3D::operator+= (const vector3D & v)
 {
     for(auto i = 0 ; i < DIM ; ++i)
         data[i] += v[i];
+    return *this;
+}
+
+vector3D& vector3D::operator-= (const vector3D & v)
+{
+    for(auto i = 0 ; i < DIM ; ++i)
+        data[i] -= v[i];
     return *this;
 }
 

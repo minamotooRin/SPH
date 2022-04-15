@@ -129,10 +129,9 @@ if __name__ == "__main__":
 
         with open( data_file_path, 'rb' ) as data_file:
 
-            data_raw = (unpack('c', data_file.read(1)))
-            DIM     = int.from_bytes(data_raw[0], byteorder='big', signed=True)
-
-            FLOAT_BYTES = 8
+            data_raw    = (unpack('cc', data_file.read(2)))
+            DIM         = int.from_bytes(data_raw[0], byteorder='big', signed=True)
+            FLOAT_BYTES = int.from_bytes(data_raw[1], byteorder='big', signed=True)
 
             if DIM == 2 :
                 draw2D(load_dict, data_file)
