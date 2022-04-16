@@ -27,7 +27,6 @@ struct vector3D
     FLOAT data[DIM];
 
     vector3D();
-    vector3D(const vector3D &v);
     vector3D(FLOAT v[DIM]);
 
     vector3D operator/ (const vector3D & v) const;

@@ -22,7 +22,7 @@ public:
     void update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
 
 private:
-
+    
     GRID update_grid(const parameter &para);
 
     vector3D get_F_pressure(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby) const;

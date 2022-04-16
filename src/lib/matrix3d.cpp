@@ -50,10 +50,6 @@ vector3D::vector3D()
 {
     memset(data, 0, sizeof(data));
 }
-vector3D::vector3D(const vector3D &v)
-{
-    memcpy(data, v.data, sizeof(data));
-}
 vector3D::vector3D(FLOAT v[DIM])
 {
     memcpy(data, v, sizeof(data));
