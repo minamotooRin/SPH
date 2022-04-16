@@ -115,12 +115,10 @@ FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &p
 
 GRID Particle::update_grid(const parameter &para)
 {   
-    UINT32 arr[DIM];
     for(int i = 0; i < DIM; ++i)
     {
-        arr[i] = static_cast<UINT32>(floor(pos[i] / para.h));
+        grid[i] = static_cast<UINT32>(floor(pos[i] / para.h));
     }
-    grid = GRID(arr);
     return grid;
 }
 
