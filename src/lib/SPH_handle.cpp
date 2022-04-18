@@ -97,11 +97,14 @@ std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(PARTICLE_NUMBER p)
     for( const GRID & dg : dgs)
     {
         GRID g = particles[p].grid + dg;
-        for( PARTICLE_NUMBER it : grid_2_particles[g] )
+        if(grid_2_particles.count(g))
         {
-            if(distance_sqr(particles[it], particles[p]) < para.h2)
+            for( PARTICLE_NUMBER it : grid_2_particles[g] )
             {
-                ans.insert(it);
+                if(distance_sqr(particles[it], particles[p]) < para.h2)
+                {
+                    ans.insert(it);
+                }
             }
         }
     }

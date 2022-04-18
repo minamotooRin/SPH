@@ -6,7 +6,7 @@
         "y" : 0.1,
         "z" : 0.1
     },
-    "paritcle_number" :40000,
+    "paritcle_number" :10000,
     "centralization" : 2,
     "step" : 400,
     "dt" : 0.001,
@@ -14,7 +14,7 @@
 
     "mass" : 1,
     "kernel_radius" : 0.001,
-    "viscosity" : 50000,
+    "viscosity" : 500,
     "gas_constant" : 0.01,
     "rest_desity" : 45.0,
     "tension_coefficient" : 100
