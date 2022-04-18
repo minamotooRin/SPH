@@ -59,7 +59,7 @@ Particle::~Particle()
 
 }
 
-void Particle::update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &&p_number_nearby)
+void Particle::update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby)
 { 
     // accelerate
     static vector3D g = [&]() -> vector3D{
@@ -68,8 +68,6 @@ void Particle::update(const parameter &para, const std::vector<Particle> &partic
         return g;
     }();
 
-    update_rho(para, particles, p_number_nearby);
-    
     vector3D F_pressure = get_F_pressure(para, particles , p_number_nearby);
     vector3D F_viscosity = get_F_viscosity(para, particles , p_number_nearby);
     vector3D F_tension = get_F_tension(para, particles , p_number_nearby);

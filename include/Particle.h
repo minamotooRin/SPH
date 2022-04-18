@@ -19,7 +19,7 @@ public:
     FLOAT rho;
 
     FLOAT update_rho(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
-    void update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &&p_number_nearby);
+    void update(const parameter &para, const std::vector<Particle> &particles, const std::set<PARTICLE_NUMBER> &p_number_nearby);
 
 private:
     

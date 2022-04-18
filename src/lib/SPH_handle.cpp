@@ -67,10 +67,6 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         grid_2_particles[particles.back().grid].insert(it);
         ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
     }
-    for(PARTICLE_NUMBER it = 0; it < para.number; ++it)
-    {
-        particles[it].update_rho(para, particles, get_nearby_paticles(it));
-    }
 }
 
 SPH_handle::~SPH_handle()
@@ -126,10 +122,11 @@ void SPH_handle::run(UINT32 step)
         return ;
     }
     
+    std::vector<std::set<PARTICLE_NUMBER>> P_2_nearbyP(para.number);
     std::vector<Particle> particles_dup;
 
     std::queue<std::future<void> > results;
-    std::atomic<PARTICLE_NUMBER> pn = 0;
+    std::atomic<PARTICLE_NUMBER> progress = 0;
     
     for(UINT32 s = 0 ; s < step; s ++)
     {
@@ -139,17 +136,39 @@ void SPH_handle::run(UINT32 step)
             std::cout << s + step_cnt << " / " << step + step_cnt << std::endl;
         }
 
-        particles_dup = particles;
-        pn = 0;
+        progress = 0;
+        auto process_rho = [&]() -> void
+        {
+            PARTICLE_NUMBER it = 0;
+            while(progress < para.number)
+            {
+                it = progress++;
+                if(unlikely(it >= para.number)) break;
+                P_2_nearbyP[it] = get_nearby_paticles(it);
+                particles[it].update_rho(para, particles, P_2_nearbyP[it]);
+            }
+        };
+        for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)
+        {
+            results.emplace(pool.commit(process_rho));
+        }
+        while(!results.empty())
+        {
+            results.front().get();
+            results.pop();
+        }
 
+        particles_dup = particles;
+
+        progress = 0;
         auto process_update = [&]() -> void
         {
             PARTICLE_NUMBER it = 0;
-            while(pn < para.number)
+            while(progress < para.number)
             {
-                it = pn++;
-                if(unlikely(it > para.number)) break;
-                particles[it].update(para, particles_dup, get_nearby_paticles(it));
+                it = progress++;
+                if(unlikely(it >= para.number)) break;
+                particles[it].update(para, particles_dup, P_2_nearbyP[it]);
             }
         };
         for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)

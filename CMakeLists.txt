@@ -4,7 +4,7 @@ project(SPH)
 add_definitions(-DDIM=2)
 add_definitions(-DTHREAD_CNT=4)
 
-# SET(DEBUG_MODE TRUE)
+SET(DEBUG_MODE TRUE)
 
 if(DEBUG_MODE)
     message(STATUS "===Compiling in DEBUG mode...===" )
