@@ -41,7 +41,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
     UINT32 bottom_number = para.number / (power( 2 * para.part + 1, DIM - 1) + 1);
     
     srand(time(0));
-    for(int it = 0; it < para.number - bottom_number; it++)
+    for(PARTICLE_NUMBER it = 0; it < para.number - bottom_number; it++)
     {
         FLOAT pos[DIM];
         for(auto d = 0 ; d < DIM - 1; d++)
@@ -54,7 +54,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         grid_2_particles[particles.back().grid].insert(it);
         ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
     }
-    for(int it = para.number - bottom_number; it < para.number; it++)
+    for(PARTICLE_NUMBER it = para.number - bottom_number; it < para.number; it++)
     {
         FLOAT pos[DIM];
         for(auto d = 0 ; d < DIM; d++)
@@ -66,6 +66,10 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         particles.emplace_back( Particle(para, vector3D(pos) ) );
         grid_2_particles[particles.back().grid].insert(it);
         ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
+    }
+    for(PARTICLE_NUMBER it = 0; it < para.number; ++it)
+    {
+        particles[it].update_rho(para, particles, get_nearby_paticles(it));
     }
 }
 
@@ -114,17 +118,17 @@ void SPH_handle::run()
     run(para.step);
 }
 
+
 void SPH_handle::run(UINT32 step)
 {
     if(!isReady)
     {
         return ;
     }
-
-    std::vector<std::set<PARTICLE_NUMBER> > P_2_nearP(para.number);
+    
     std::vector<Particle> particles_dup;
 
-    std::vector<std::future<void> > results;
+    std::queue<std::future<void> > results;
     std::atomic<PARTICLE_NUMBER> pn = 0;
     
     for(UINT32 s = 0 ; s < step; s ++)
@@ -135,50 +139,27 @@ void SPH_handle::run(UINT32 step)
             std::cout << s + step_cnt << " / " << step + step_cnt << std::endl;
         }
 
-        results.clear();
-        pn = 0;
-        auto process_rho = [&]() -> void
-        {
-            PARTICLE_NUMBER it;
-            while(pn < para.number)
-            {
-                it = pn++;
-                if(unlikely(it >= para.number)) break;
-                P_2_nearP[it] = get_nearby_paticles(it); // move assign
-                particles[it].update_rho(para, particles, P_2_nearP[it]);
-            }
-        };
-        for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)
-        {
-            results.emplace_back(pool.commit(process_rho));
-        }
-        for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)
-        {
-            results[t_cnt].get();
-        }
-
         particles_dup = particles;
-
-        results.clear();
         pn = 0;
+
         auto process_update = [&]() -> void
         {
-            PARTICLE_NUMBER it;
+            PARTICLE_NUMBER it = 0;
             while(pn < para.number)
             {
                 it = pn++;
-                if(unlikely(it >= para.number)) break;
-                Particle &p = particles[it];
-                p.update(para, particles_dup, P_2_nearP[it]);
+                if(unlikely(it > para.number)) break;
+                particles[it].update(para, particles_dup, get_nearby_paticles(it));
             }
         };
         for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)
         {
-            results.emplace_back(pool.commit(process_update));
+            results.emplace(pool.commit(process_update));
         }
-        for(UINT32 t_cnt = 0; t_cnt < thread_cnt; t_cnt++)
+        while(!results.empty())
         {
-            results[t_cnt].get();
+            results.front().get();
+            results.pop();
         }
 
         for(auto & it : grid_2_particles)
