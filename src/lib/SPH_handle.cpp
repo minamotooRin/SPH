@@ -143,7 +143,7 @@ void SPH_handle::run(UINT32 step)
             while(pn < para.number)
             {
                 it = pn++;
-                if(it >= para.number) break;
+                if(unlikely(it >= para.number)) break;
                 P_2_nearP[it] = get_nearby_paticles(it); // move assign
                 particles[it].update_rho(para, particles, P_2_nearP[it]);
             }
@@ -167,7 +167,7 @@ void SPH_handle::run(UINT32 step)
             while(pn < para.number)
             {
                 it = pn++;
-                if(it >= para.number) break;
+                if(unlikely(it >= para.number)) break;
                 Particle &p = particles[it];
                 p.update(para, particles_dup, P_2_nearP[it]);
             }
