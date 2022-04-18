@@ -10,9 +10,11 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <atomic>
 
 #include "Particle.h"
 #include "Timer.h"
+#include "threadPool.h"
 
 enum class ERROR_CODE
 {
@@ -50,6 +52,10 @@ private:
 
     // Functions
     void run(UINT32 step);
+
+    // thread pool
+    std::threadpool pool;
+    static constexpr UINT32 thread_cnt = THREAD_CNT;
 
 };
 

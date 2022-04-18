@@ -17,6 +17,5 @@ Results would be like:
 ![Figure_2](.assets/Figure_2.png "Figure_2")
 
 ## TODO
-- Adding multi thread support.
 - Dimension in config.
 - Adding Animation.
