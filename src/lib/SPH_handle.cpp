@@ -50,7 +50,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
         }
         pos[DIM - 1] =  static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
     
-        particles.push_back( Particle(para, vector3D(pos) ) );
+        particles.emplace_back( Particle(para, vector3D(pos) ) );
         grid_2_particles[particles.back().grid].insert(it);
         ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
     }
@@ -63,7 +63,7 @@ SPH_handle::SPH_handle(std::string input, std::string output)
             pos[d] = para.part * para.volume[d] / (2.0 * para.part + 1)
                 + static_cast <FLOAT> (rand()) /( static_cast <FLOAT> (RAND_MAX/(para.volume.min_ele()/(2.0 * para.part + 1))));
         }
-        particles.push_back( Particle(para, vector3D(pos) ) );
+        particles.emplace_back( Particle(para, vector3D(pos) ) );
         grid_2_particles[particles.back().grid].insert(it);
         ofs.write(reinterpret_cast<const char*>(pos), sizeof(FLOAT) * DIM);
     }
@@ -82,14 +82,14 @@ std::set<PARTICLE_NUMBER> SPH_handle::get_nearby_paticles(PARTICLE_NUMBER p)
         std::vector<GRID> ans;
 
         UINT32 arr[DIM] = {0};
-        ans.push_back(GRID(arr)); // 0 0 0 ...
+        ans.emplace_back(GRID(arr)); // 0 0 0 ...
         for(int i = 0; i < DIM; ++i)
         {
             memset(arr, 0, sizeof(arr));
             arr[i] = 1;
-            ans.push_back(GRID(arr));
+            ans.emplace_back(GRID(arr));
             arr[i] = -1;
-            ans.push_back(GRID(arr));
+            ans.emplace_back(GRID(arr));
         }
 
         return ans;
