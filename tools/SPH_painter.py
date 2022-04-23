@@ -15,6 +15,9 @@ fig = plt.figure(figsize=(8, 6), tight_layout=True) # do not need generate a new
     
 def draw2D(load_dict, data_file):
 
+    # selected coordinate
+    x_range = (0, load_dict["volume"]["x"])
+    y_range = (0, load_dict["volume"]["y"])
     size    = load_dict["paritcle_number"]
     print ("Number: ", size)
 
@@ -23,6 +26,8 @@ def draw2D(load_dict, data_file):
     if FLOAT_BYTES == 8:
         data_type   = 'd'
 
+    plt.xlim(x_range)
+    plt.ylim(y_range)
     x,y = [],[]
     sc = plt.scatter(x,y, alpha=0.1)
 
@@ -49,6 +54,9 @@ def draw2D(load_dict, data_file):
 
 def draw3D(load_dict, data_file):
 
+    x_range = (0, load_dict["volume"]["x"])
+    y_range = (0, load_dict["volume"]["y"])
+    z_range = (0, load_dict["volume"]["z"])
     size    = load_dict["paritcle_number"]
     print ("Number: ", size)
 
@@ -57,15 +65,20 @@ def draw3D(load_dict, data_file):
     if FLOAT_BYTES == 8:
         data_type = 'd'
 
-    x,y,z = [],[],[]
-    ax3 = plt.axes(projection = '3d') # do not need generate a new canvas every time
-    ax3.scatter(x, y, z, alpha=0.05)
+    x,y,z   = [],[],[]
+    ax3     = plt.axes(projection = '3d') # do not need generate a new canvas every time
+    ax3.set_xlim(x_range)
+    ax3.set_ylim(y_range)
+    ax3.set_zlim(z_range)
+    sc      = ax3.scatter(x, y, z, alpha=0.05)
 
-    step_cnt = 0
-    data_b          = data_file.read(size_per_batch)
+    step_cnt     = 0
+    data_b       = data_file.read(size_per_batch)
     while size_per_batch == len(data_b) :
 
         step_cnt += 1 
+        if step_cnt % 100 == 0 :
+            print("Progress: {}/{}".format(step_cnt, load_dict["step"]))
         
         data_raw    = unpack(data_type * DIM * size , data_b) # tuple
         data        = np.asarray(data_raw)
@@ -74,8 +87,8 @@ def draw3D(load_dict, data_file):
         y           = data[1 : : 3]
         z           = data[2 : : 3]
         
-        ax3.set_offsets(np.c_[x,y,z])
-        yield ax3,
+        sc._offsets3d = (x,y,z)
+        yield sc,
         
         data_b      = data_file.read(size_per_batch)
 
@@ -102,17 +115,9 @@ if __name__ == "__main__":
             DIM         = int.from_bytes(data_raw[0], byteorder='big', signed=True)
             FLOAT_BYTES = int.from_bytes(data_raw[1], byteorder='big', signed=True)
 
-            # selected coordinate
-            x_range = (0, load_dict["volume"]["x"])
-            y_range = (0, load_dict["volume"]["y"])
-            plt.xlim(x_range)
-            plt.ylim(y_range)
-
             if DIM == 2 :
                 frames_iter = draw2D(load_dict, data_file)
             elif DIM == 3:
-                z_range = (0, load_dict["volume"]["z"])
-                plt.xlim(z_range)
                 frames_iter = draw3D(load_dict, data_file)
                 
             update = lambda f: next(frames_iter)
