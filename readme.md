@@ -18,4 +18,4 @@ Results would be like:
 
 ## TODO
 - Dimension in config.
-- Adding Animation.
+- Adding Animation for 3D.

@@ -6,16 +6,16 @@
         "y" : 0.1,
         "z" : 0.1
     },
-    "paritcle_number" :10000,
-    "centralization" : 2,
-    "step" : 400,
+    "paritcle_number" :50,
+    "centralization" : 1,
+    "step" : 50,
     "dt" : 0.001,
     "gravity" : 98.1,
 
-    "mass" : 1,
+    "mass" : 0.1,
     "kernel_radius" : 0.001,
-    "viscosity" : 500,
-    "gas_constant" : 0.01,
-    "rest_desity" : 45.0,
+    "viscosity" : 5000,
+    "gas_constant" : 0.001,
+    "rest_desity" : 50,
     "tension_coefficient" : 100
 }

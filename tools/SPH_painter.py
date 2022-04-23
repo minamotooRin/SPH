@@ -1,93 +1,71 @@
-from ctypes.wintypes import FLOAT
-import sys
 import json
-import numpy as np
 from struct import unpack
+
+import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation, writers
+
+import sys
+# from functools import partial
 
 global FLOAT_BYTES
 global DIM
 
+fig = plt.figure(figsize=(8, 6), tight_layout=True) # do not need generate a new canvas every time
+    
 def draw2D(load_dict, data_file):
-
-    dt      = load_dict["dt"]
-    x_range = (0, load_dict["volume"]["x"])
-    y_range = (0, load_dict["volume"]["y"])
 
     size    = load_dict["paritcle_number"]
     print ("Number: ", size)
 
     size_per_batch  = size * DIM * FLOAT_BYTES
-    data_b          = data_file.read(size_per_batch)
+    data_type       = 'f'
+    if FLOAT_BYTES == 8:
+        data_type   = 'd'
 
     x,y = [],[]
-
-    # Anime
-    # figure= plt.figure(figsize=(4, 1), dpi = 320)
-
-    plt.ion()
-    ax2 = plt.figure(figsize=(8, 6)) # do not need generate a new canvas every time
+    sc = plt.scatter(x,y, alpha=0.1)
 
     step_cnt = 0
+    data_b          = data_file.read(size_per_batch)
     while size_per_batch == len(data_b) :
-
-        # print(step_cnt)
         step_cnt += 1 
-        
-        data_type = 'f'
-        if FLOAT_BYTES == 8:
-            data_type = 'd'
+        if step_cnt % 100 == 0 :
+            print("Progress: {}/{}".format(step_cnt, load_dict["step"]))
+
         data_raw    = unpack(data_type * DIM * size , data_b) # tuple
         data        = np.asarray(data_raw)
         
         x           = data[0 : : 2]
         y           = data[1 : : 2]
         
-        plt.cla()
-        # selected coordinate
-        plt.xlim(x_range)
-        plt.ylim(y_range)
-        plt.scatter(x, y, alpha=0.1)
-        plt.pause(dt)
-        
+        sc.set_offsets(np.c_[x,y])
+        # sc = plt.scatter(x,y)
+        yield sc,
+
         data_b      = data_file.read(size_per_batch)
 
     print("Done.")
 
-    plt.ioff()    
-    plt.scatter(x, y, alpha=0.1)
-    plt.show()
-
 def draw3D(load_dict, data_file):
-
-    dt      = load_dict["dt"]
-    x_range = (0, load_dict["volume"]["x"])
-    y_range = (0, load_dict["volume"]["y"])
-    z_range = (0, load_dict["volume"]["z"])
 
     size    = load_dict["paritcle_number"]
     print ("Number: ", size)
 
     size_per_batch  = size * DIM * FLOAT_BYTES
-    data_b          = data_file.read(size_per_batch)
+    data_type = 'f'
+    if FLOAT_BYTES == 8:
+        data_type = 'd'
 
     x,y,z = [],[],[]
-
-    # Anime
-    # figure= plt.figure(figsize=(4, 1), dpi = 320)
-
-    plt.ion()
     ax3 = plt.axes(projection = '3d') # do not need generate a new canvas every time
+    ax3.scatter(x, y, z, alpha=0.05)
 
     step_cnt = 0
+    data_b          = data_file.read(size_per_batch)
     while size_per_batch == len(data_b) :
 
-        # print(step_cnt)
         step_cnt += 1 
-
-        data_type = 'f'
-        if FLOAT_BYTES == 8:
-            data_type = 'd'
         
         data_raw    = unpack(data_type * DIM * size , data_b) # tuple
         data        = np.asarray(data_raw)
@@ -96,21 +74,12 @@ def draw3D(load_dict, data_file):
         y           = data[1 : : 3]
         z           = data[2 : : 3]
         
-        plt.cla()
-        # selected coordinate
-        ax3.set_xlim(x_range)
-        ax3.set_ylim(y_range)
-        ax3.set_zlim(z_range)
-        ax3.scatter(x, y, z, alpha=0.05)
-        plt.pause(dt)
+        ax3.set_offsets(np.c_[x,y,z])
+        yield ax3,
         
         data_b      = data_file.read(size_per_batch)
 
     print("Done.")
-
-    plt.ioff()    
-    ax3.scatter(x,y,z)
-    plt.show()
 
 if __name__ == "__main__":
 
@@ -133,7 +102,25 @@ if __name__ == "__main__":
             DIM         = int.from_bytes(data_raw[0], byteorder='big', signed=True)
             FLOAT_BYTES = int.from_bytes(data_raw[1], byteorder='big', signed=True)
 
+            # selected coordinate
+            x_range = (0, load_dict["volume"]["x"])
+            y_range = (0, load_dict["volume"]["y"])
+            plt.xlim(x_range)
+            plt.ylim(y_range)
+
             if DIM == 2 :
-                draw2D(load_dict, data_file)
+                frames_iter = draw2D(load_dict, data_file)
             elif DIM == 3:
-                draw3D(load_dict, data_file)
+                z_range = (0, load_dict["volume"]["z"])
+                plt.xlim(z_range)
+                frames_iter = draw3D(load_dict, data_file)
+                
+            update = lambda f: next(frames_iter)
+
+            # load_dict["dt"]
+            ani = FuncAnimation(fig, update, frames=np.arange(0, load_dict["step"]), interval=1)
+            # plt.show()
+
+            Writer = writers['ffmpeg']#需安装ffmpeg
+            writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+            ani.save("{}_{}.mp4".format(load_dict["paritcle_number"], load_dict["step"]), writer=writer)

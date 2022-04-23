@@ -52,13 +52,17 @@ public:
 			throw runtime_error("commit on ThreadPool is stopped.");
 
 		using RetType = decltype(f(args...)); // typename std::result_of<F(Args...)>::type, 函数 f 的返回值类型
+		
+		// 把函数入口及参数,打包(绑定bind)为RetType()，然后用packaged_task包装，packaged_task类似于function，但是可将其结果传递给future对象。
+		// make_shared 大概是为了提高性能？不完全是，_tasks只保存执行task的lambda，不保存task（若要保存则需要复制，浪费时间）。
 		auto task = make_shared<packaged_task<RetType()>>(
 			bind(forward<F>(f), forward<Args>(args)...)
-		); // 把函数入口及参数,打包(绑定)
+		); 
+
 		future<RetType> future = task->get_future();
 		{    // 添加任务到队列
 			lock_guard<mutex> lock{ _lock };//对当前块的语句加锁  lock_guard 是 mutex 的 stack 封装类，构造的时候 lock()，析构的时候 unlock()
-			_tasks.emplace([task](){ // push(Task{...}) 放到队列后面
+			_tasks.emplace([task](){ // push(Task{...}) 放到队列后面，这个lambda才是 void()
 				(*task)();
 			});
 		}
@@ -110,4 +114,4 @@ private:
 
 }
 
-#endif  //https://github.com/lzpong/
+#endif  // https://github.com/lzpong/threadpool
