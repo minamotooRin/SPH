@@ -13,8 +13,12 @@ python3 build/SPH_painter.py tools/input.json
 
 Results would be like:
 
-![Figure_1](.assets/Figure_1.png "Figure_1")
-![Figure_2](.assets/Figure_2.png "Figure_2")
+<video id="video" controls="" preload="none" poster=".assets/Figure_2.png">
+      <source id="mp4" src=".assets/10000_1000.mp4" type="video/mp4">
+</videos>
+
+<!-- ![Figure_1](.assets/Figure_1.png "Figure_1")
+![Figure_2](.assets/Figure_2.png "Figure_2") -->
 
 ## TODO
 - Dimension in config.

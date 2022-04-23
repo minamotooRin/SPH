@@ -4,4 +4,4 @@ data
 test
 main
 *.bin
-*.mp4
+./*.mp4
