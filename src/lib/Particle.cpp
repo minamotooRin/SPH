@@ -2,7 +2,7 @@
 
 #define _USE_MATH_DEFINES
 
-FLOAT Particle::kernel_poly6(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
+FLOAT Particle::kernel_poly6(vector3D &&r, FLOAT h2, FLOAT h9)
 {
     FLOAT ans = 0;
     FLOAT r_abs_sqr = r * r;
@@ -11,7 +11,7 @@ FLOAT Particle::kernel_poly6(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9
     return ans;
 }
 
-vector3D Particle::kernal_poly6_gradient(vector3D &&r , FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
+vector3D Particle::kernal_poly6_gradient(vector3D &&r, FLOAT h2, FLOAT h9)
 {
     vector3D ans;
     FLOAT r_abs_sqr = r * r;
@@ -20,7 +20,7 @@ vector3D Particle::kernal_poly6_gradient(vector3D &&r , FLOAT h, FLOAT h2, FLOAT
     return ans;
 }
 
-FLOAT Particle::kernal_poly6_laplacian(vector3D &&r , FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
+FLOAT Particle::kernal_poly6_laplacian(vector3D &&r, FLOAT h2, FLOAT h9)
 {
     FLOAT ans = 0;
     FLOAT r_abs_sqr = r * r;
@@ -29,7 +29,7 @@ FLOAT Particle::kernal_poly6_laplacian(vector3D &&r , FLOAT h, FLOAT h2, FLOAT h
     return ans;
 }
 
-vector3D Particle::kernel_spiky_gradient(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
+vector3D Particle::kernel_spiky_gradient(vector3D &&r, FLOAT h, FLOAT h6)
 {
     vector3D ans;
     FLOAT r_abs = r.abs();
@@ -38,7 +38,7 @@ vector3D Particle::kernel_spiky_gradient(vector3D &&r, FLOAT h, FLOAT h2, FLOAT 
     return ans;
 }
 
-FLOAT Particle::kernel_viscosity_laplacian(vector3D &&r, FLOAT h, FLOAT h2, FLOAT h6, FLOAT h9)
+FLOAT Particle::kernel_viscosity_laplacian(vector3D &&r, FLOAT h, FLOAT h6)
 {
     FLOAT ans = 0;
     FLOAT r_abs = r.abs();
@@ -71,11 +71,11 @@ void Particle::update(const parameter &para, const std::vector<Particle> &partic
     vector3D F_pressure = get_F_pressure(para, particles , p_number_nearby);
     vector3D F_viscosity = get_F_viscosity(para, particles , p_number_nearby);
     vector3D F_tension = get_F_tension(para, particles , p_number_nearby);
-    vector3D F_G = g * rho;
+    // vector3D F_G = g * rho;
 
     // std::cout << F_pressure.abs() << "\t" << F_viscosity.abs() << "\t" << F_tension.abs() << "\t" << F_G.abs() << std::endl;
     
-    vector3D a  = (F_pressure + F_viscosity + F_tension + F_G) / rho ;
+    vector3D a  = (F_pressure + F_viscosity + F_tension) / rho + g;
     
     // move
     pos         = pos + v * para.dt + a * para.dt2 / 2; 
@@ -105,7 +105,7 @@ FLOAT Particle::update_rho(const parameter &para, const std::vector<Particle> &p
 
     for(PARTICLE_NUMBER p : p_number_nearby)
     {
-        rho += kernel_poly6(pos - particles[p].pos , para.h, para.h2, para.h6, para.h9);
+        rho += kernel_poly6(pos - particles[p].pos ,para.h2, para.h9);
     }
 
     rho *= para.m;
@@ -129,7 +129,7 @@ vector3D Particle::get_F_pressure(const parameter &para, const std::vector<Parti
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle &pa = particles[p];
-        ans += kernel_spiky_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9) * (pa.rho + rho - para.rho0_2) / (2*pa.rho) ; 
+        ans += kernel_spiky_gradient( pos - pa.pos , para.h, para.h6) * (pa.rho + rho - para.rho0_2) / (2*pa.rho) ; 
     }
 
     ans *= - para.k_m;
@@ -143,7 +143,7 @@ vector3D Particle::get_F_viscosity(const parameter &para, const std::vector<Part
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle &pa = particles[p];
-        ans += ((pa.v - v) / pa.rho) * kernel_viscosity_laplacian(pos - pa.pos, para.h, para.h2, para.h6, para.h9);
+        ans += ((pa.v - v) / pa.rho) * kernel_viscosity_laplacian(pos - pa.pos, para.h, para.h6);
     }
 
     ans *= para.mu_m;
@@ -160,8 +160,8 @@ vector3D Particle::get_F_tension(const parameter &para, const std::vector<Partic
     for (PARTICLE_NUMBER p : p_number_nearby)
     {
         const Particle & pa = particles[p];
-        cs_grad += kernal_poly6_gradient( pos - pa.pos , para.h, para.h2, para.h6, para.h9 ) / pa.rho ;
-        cs_lap  += kernal_poly6_laplacian( pos - pa.pos , para.h, para.h2, para.h6, para.h9 ) / pa.rho ; 
+        cs_grad += kernal_poly6_gradient( pos - pa.pos, para.h2, para.h9 ) / pa.rho ;
+        cs_lap  += kernal_poly6_laplacian( pos - pa.pos, para.h2, para.h9 ) / pa.rho ; 
     }
 
     cs_grad *= para.m;
