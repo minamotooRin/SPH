@@ -6,9 +6,9 @@
         "y" : 12,
         "z" : 12
     },
-    "paritcle_number" : 2000,
+    "paritcle_number" : 20000,
     "centralization" : 3,
-    "step" : 1000,
+    "step" : 10000,
     "dt" : 0.001,
     "gravity" : 9.81,
 
