@@ -33,5 +33,13 @@ add_library(SPH SHARED
 add_executable(main
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 )
+IF (WIN32)
+	MESSAGE(STATUS "Now is windows")
+ELSEIF (APPLE)
+	MESSAGE(STATUS "Now is Apple systens.")
+ELSEIF (UNIX)
+	MESSAGE(STATUS "Now is UNIX-like OS's.")
+    target_link_libraries(main pthread)
+ENDIF ()
 
 target_link_libraries(main SPH)
